@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>EBP Final Examination</title>
+<style>
+:root{--blue:#1456a0;--blue2:#2375c9;--navy:#102b4e;--ink:#172b42;--muted:#607187;--line:#d8e2ef;--pale:#edf5ff;--bg:#f4f7fb;--white:#fff;--green:#168451;--red:#c33d4b;--shadow:0 12px 35px rgba(22,55,91,.09)}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:linear-gradient(145deg,#f7faff 0%,#eef4fb 100%);color:var(--ink);font-family:"Times New Roman",Times,serif;font-size:17px;line-height:1.5}
+button{font:inherit}
+.shell{width:min(1180px,calc(100% - 32px));margin:28px auto 48px}
+.hero{background:linear-gradient(120deg,#103b70,#1768b4);color:#fff;border-radius:22px;padding:26px 30px;box-shadow:0 15px 35px rgba(16,59,112,.2);position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;width:260px;height:260px;border:1px solid rgba(255,255,255,.16);border-radius:50%;right:-65px;top:-130px;box-shadow:0 0 0 28px rgba(255,255,255,.035),0 0 0 58px rgba(255,255,255,.025)}
+.eyebrow{text-transform:uppercase;letter-spacing:.12em;font: bold 12px Arial,sans-serif;opacity:.8}
+h1{font-size:clamp(27px,4vw,39px);line-height:1.12;margin:7px 0 9px}
+.subtitle{margin:0;color:#e3efff}
+.stats{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+.stat{border:1px solid rgba(255,255,255,.24);background:rgba(255,255,255,.1);border-radius:12px;padding:8px 13px;font-size:15px}
+.layout{display:grid;grid-template-columns:270px minmax(0,1fr);gap:20px;margin-top:20px;align-items:start}
+.panel,.exam-card,.results-card{background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}
+.sidebar{padding:18px;position:sticky;top:14px}
+.side-title{font-weight:bold;color:var(--navy);font-size:19px;margin:0 0 12px}
+.timerbox{background:var(--pale);border:1px solid #d3e5fa;border-radius:13px;padding:12px 14px;margin-bottom:16px}
+.timer-label{font: bold 11px Arial,sans-serif;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.timer{font:bold 28px Arial,sans-serif;color:var(--blue);font-variant-numeric:tabular-nums}
+.timer.warning{color:var(--red)}
+.progress-meta{display:flex;justify-content:space-between;gap:8px;font-size:14px;color:var(--muted);margin:10px 0 7px}
+.progress-track{height:9px;background:#e7edf5;border-radius:99px;overflow:hidden}
+.progress-fill{height:100%;width:0;background:linear-gradient(90deg,var(--blue),#51a0ed);transition:width .2s}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin:13px 0}
+.dot{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:4px;background:#e8eef6;border:1px solid #cbd7e5}
+.dot.done{background:#d8ebff;border-color:#72a9e1}.dot.current{background:var(--blue);border-color:var(--blue)}
+.nav-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px}
+.nav-btn{border:1px solid var(--line);background:#f8fafc;color:#42566e;border-radius:8px;min-height:36px;cursor:pointer;font:14px Arial,sans-serif;transition:.15s}
+.nav-btn:hover{border-color:var(--blue2)}
+.nav-btn.answered{background:#dceeff;border-color:#9bc6ef;color:#104d8c;font-weight:bold}
+.nav-btn.active{background:var(--blue);color:#fff;border-color:var(--blue);box-shadow:0 3px 9px #1456a044}
+.nav-btn:focus-visible,.btn:focus-visible,.option:focus-within{outline:3px solid #83bafa;outline-offset:2px}
+.main{min-width:0}
+.exam-card{padding:clamp(18px,3vw,30px)}
+.topline{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:15px}
+.part-tag{display:inline-flex;align-items:center;background:#eaf3ff;color:#1456a0;border:1px solid #d5e7fb;border-radius:999px;padding:5px 11px;font:bold 12px Arial,sans-serif;letter-spacing:.04em}
+.question-count{font:13px Arial,sans-serif;color:var(--muted)}
+.module-name{color:var(--muted);font:13px Arial,sans-serif;margin:0 0 7px}
+.question{font-size:clamp(19px,2.2vw,23px);line-height:1.38;font-weight:bold;color:#172f4d;margin:0 0 20px}
+.options{display:grid;gap:11px}
+.option{display:flex;align-items:flex-start;gap:12px;border:1.5px solid var(--line);background:#fff;border-radius:13px;padding:13px 15px;cursor:pointer;transition:border-color .15s,background .15s,transform .15s}
+.option:hover{border-color:#8bb8e6;background:#f8fbff}
+.option.selected{border-color:var(--blue2);background:#edf6ff;box-shadow:inset 0 0 0 1px var(--blue2)}
+.option input{position:absolute;opacity:0;pointer-events:none}
+.letter{width:28px;height:28px;flex:0 0 28px;border-radius:8px;background:#eef2f7;color:#40566f;display:grid;place-items:center;font:bold 13px Arial,sans-serif}
+.option.selected .letter{background:var(--blue);color:#fff}
+.option-text{padding-top:2px}
+.controls{display:flex;justify-content:space-between;gap:10px;margin-top:25px;flex-wrap:wrap}
+.btn{border:0;border-radius:11px;padding:11px 18px;cursor:pointer;font-weight:bold;transition:transform .15s,filter .15s}
+.btn:hover{filter:brightness(1.04);transform:translateY(-1px)}
+.btn:disabled{opacity:.42;cursor:not-allowed;transform:none}
+.btn-secondary{background:#edf2f8;color:#29445f;border:1px solid #d8e1ec}
+.btn-primary{background:var(--blue);color:#fff;box-shadow:0 5px 12px #1456a033}
+.btn-submit{background:#0e7549;color:#fff;box-shadow:0 5px 12px #0e754933}
+.notice{font-size:13px;color:var(--muted);margin:16px 0 0}
+.module-break{font:12px Arial,sans-serif;color:#607187;margin:14px 0 8px;font-weight:bold}
+.module-break:first-child{margin-top:0}
+.footer-note{text-align:center;color:#7b8a9b;font-size:12px;margin-top:16px}
+.hidden{display:none!important}
+.results-card{padding:clamp(20px,4vw,36px)}
+.result-head{text-align:center;padding:10px 0 22px}
+.result-icon{width:62px;height:62px;border-radius:50%;background:#e2f5eb;color:#12804d;display:grid;place-items:center;margin:0 auto 12px;font:30px Arial,sans-serif}
+.result-head h2{margin:0;color:var(--navy);font-size:30px}
+.score{font:bold clamp(38px,7vw,58px) Arial,sans-serif;color:var(--blue);margin:8px 0}
+.percent{color:var(--muted);font-size:18px}
+.result-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0 26px}
+.result-stat{background:#f4f8fd;border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}
+.result-stat strong{display:block;font:bold 24px Arial,sans-serif;color:var(--navy)}
+.result-stat span{font-size:13px;color:var(--muted)}
+.review-title{font-size:22px;color:var(--navy);margin:22px 0 12px}
+.review-item{border:1px solid var(--line);border-radius:12px;padding:14px;margin:10px 0}
+.review-item.correct{border-left:5px solid var(--green)}
+.review-item.incorrect{border-left:5px solid var(--red)}
+.review-q{font-weight:bold;margin:0 0 9px}
+.review-line{font-size:15px;margin:4px 0}
+.status{font:bold 12px Arial,sans-serif;text-transform:uppercase;letter-spacing:.05em}
+.status.good{color:var(--green)}.status.bad{color:var(--red)}
+.review-explanation{font-size:14px;color:#52677e;background:#f6f9fc;border-radius:8px;padding:9px 11px;margin-top:9px}
+.modal-backdrop{position:fixed;inset:0;background:rgba(8,24,43,.56);display:grid;place-items:center;padding:18px;z-index:20}
+.modal{width:min(440px,100%);background:#fff;border-radius:18px;padding:24px;box-shadow:0 20px 60px #071b3344}
+.modal h2{margin:0 0 8px;color:var(--navy);font-size:25px}
+.modal p{color:#52677e;margin:7px 0 17px}
+.modal-stats{display:flex;gap:10px;margin:15px 0}
+.modal-stat{flex:1;background:#f2f6fb;border-radius:10px;padding:10px;text-align:center}
+.modal-stat strong{display:block;font:bold 23px Arial,sans-serif;color:var(--navy)}
+.modal-actions{display:flex;justify-content:flex-end;gap:9px;flex-wrap:wrap}
+@media(max-width:850px){.layout{grid-template-columns:1fr}.sidebar{position:static;order:0}.main{order:1}.nav-grid{grid-template-columns:repeat(10,minmax(0,1fr))}}
+@media(max-width:560px){body{font-size:16px}.shell{width:calc(100% - 18px);margin:9px auto 25px}.hero{padding:21px 18px;border-radius:16px}.stats{gap:7px}.stat{font-size:13px;padding:7px 9px}.layout{gap:12px;margin-top:12px}.sidebar{padding:14px}.nav-grid{grid-template-columns:repeat(8,minmax(0,1fr));gap:5px}.nav-btn{min-height:34px;font-size:12px}.exam-card{padding:17px 14px}.option{padding:11px 10px;gap:9px}.controls{display:grid;grid-template-columns:1fr 1fr}.controls .btn{padding:11px 8px;font-size:14px}.controls .btn-submit{grid-column:1/-1;grid-row:2}.result-grid{grid-template-columns:repeat(2,1fr)}.question{font-size:19px}}
+@media(max-width:360px){.nav-grid{grid-template-columns:repeat(6,minmax(0,1fr))}.timer{font-size:25px}.hero h1{font-size:26px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header class="hero">
+    <div class="eyebrow">Examora-compatible · Standalone examination</div>
+    <h1>Entrepreneurship and Business Planning<br>(EBP) Final Examination</h1>
+    <p class="subtitle">College-level assessment with one question for each identified key term or concept in the five modules of the EBP Final Exam Summary Reviewer.</p>
+    <div class="stats"><span class="stat">35 Questions</span><span class="stat">35 Points</span><span class="stat">All Multiple Choice</span><span class="stat">60 Minutes</span></div>
+  </header>
+  <div id="examLayout" class="layout">
+    <aside class="panel sidebar" aria-label="Exam progress and question navigation">
+      <div class="timerbox"><div class="timer-label">Time remaining</div><div id="timer" class="timer" role="timer" aria-live="off">60:00</div></div>
+      <h2 class="side-title">Your progress</h2>
+      <div class="progress-meta"><span id="answeredText">0 answered</span><span id="unansweredText">50 unanswered</span></div>
+      <div class="progress-track" role="progressbar" aria-label="Exam completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressTrack"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-meta"><span>Completion</span><strong id="percentText">0%</strong></div>
+      <div class="legend"><span><i class="dot done"></i>Answered</span><span><i class="dot current"></i>Current</span><span><i class="dot"></i>Unanswered</span></div>
+      <h2 class="side-title">Question navigator</h2>
+      <div id="navGrid" class="nav-grid"></div>
+      <p class="notice">Select any number to jump to that question. Your answers are saved as you go.</p>
+    </aside>
+    <main class="main">
+      <section class="exam-card" id="questionCard" aria-live="polite">
+        <div class="topline"><span class="part-tag">PART I · MULTIPLE CHOICE</span><span class="question-count" id="questionCount">Question 1 of 50</span></div>
+        <p class="module-name" id="moduleName">Module 1</p>
+        <h2 class="question" id="questionText"></h2>
+        <div class="options" id="options" role="radiogroup" aria-label="Answer choices"></div>
+        <div class="controls">
+          <button class="btn btn-secondary" id="prevBtn" type="button">← Previous</button>
+          <button class="btn btn-primary" id="nextBtn" type="button">Next →</button>
+          <button class="btn btn-submit" id="submitBtn" type="button">Submit Examination</button>
+        </div>
+        <p class="notice">Each question is worth 1 point. Choose the single best answer. You may review and change answers before submitting.</p>
+      </section>
+    </main>
+  </div>
+  <section id="results" class="results-card hidden" aria-live="polite"></section>
+  <div class="footer-note">EBP Final Examination · Maximum score: 35 points</div>
+</div>
+<div id="confirmModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+  <div class="modal">
+    <h2 id="confirmTitle">Submit your examination?</h2>
+    <p>Once submitted, your answers will be locked and your score will be calculated.</p>
+    <div class="modal-stats"><div class="modal-stat"><strong id="modalAnswered">0</strong><span>Answered</span></div><div class="modal-stat"><strong id="modalUnanswered">50</strong><span>Unanswered</span></div></div>
+    <div class="modal-actions"><button class="btn btn-secondary" id="cancelSubmit" type="button">Go Back</button><button class="btn btn-submit" id="confirmSubmit" type="button">Confirm Submit</button></div>
+  </div>
+</div>
+<script>
+"use strict";
+const QUESTIONS = [{"id": "q1", "module": 1, "question": "A startup is considering launching a refillable household-cleaner product. Before committing resources, the founders compare the idea's likely demand, feasibility, and market conditions. Which process are they performing?", "options": [{"id": "q1o0", "text": "Opportunity screening"}, {"id": "q1o1", "text": "Corporate storytelling"}, {"id": "q1o2", "text": "Asset management"}, {"id": "q1o3", "text": "Competitive positioning"}], "correctId": "q1o0", "explanation": "Opportunity screening evaluates product ideas, strategies, and market trends for potential success."}, {"id": "q2", "module": 1, "question": "A founder reviews proposed environmental regulations, inflation trends, changing consumer attitudes, and advances in packaging technology. Which tool best organizes these external factors?", "options": [{"id": "q2o0", "text": "Three Circles Tool"}, {"id": "q2o1", "text": "PEST analysis"}, {"id": "q2o2", "text": "Competitive analysis grid"}, {"id": "q2o3", "text": "PRIZM"}], "correctId": "q2o1", "explanation": "PEST examines political, economic, societal, and technological factors that may create opportunities or threats."}, {"id": "q3", "module": 1, "question": "A team studies published industry reports and existing market articles before conducting its own customer interviews. The published information is an example of:", "options": [{"id": "q3o0", "text": "Primary data"}, {"id": "q3o1", "text": "Qualitative data"}, {"id": "q3o2", "text": "Secondary research"}, {"id": "q3o3", "text": "Quantitative feedback"}], "correctId": "q3o2", "explanation": "Secondary research uses information already available through published sources, articles, or reports."}, {"id": "q4", "module": 1, "question": "A business distributes questionnaires to prospective customers to collect their direct opinions about a proposed service. This is best classified as:", "options": [{"id": "q4o0", "text": "Secondary research"}, {"id": "q4o1", "text": "Primary data collection"}, {"id": "q4o2", "text": "PEST analysis"}, {"id": "q4o3", "text": "Competitive analysis"}], "correctId": "q4o1", "explanation": "Primary data is gathered directly from consumers, such as through surveys or comment cards."}, {"id": "q5", "module": 1, "question": "A survey shows that 68% of respondents would purchase a product, while interviews reveal that customers value its convenience. How should the two findings be classified?", "options": [{"id": "q5o0", "text": "Both are quantitative data"}, {"id": "q5o1", "text": "Both are qualitative data"}, {"id": "q5o2", "text": "The percentage is quantitative; interview explanations are qualitative"}, {"id": "q5o3", "text": "The percentage is secondary research; interviews are PEST"}], "correctId": "q5o2", "explanation": "Numerical measurements are quantitative; explanations of why or how are qualitative."}, {"id": "q6", "module": 1, "question": "Customer feedback indicates that buyers favor a low-cost core feature, while several expensive features receive little interest. What is the most appropriate product-development response?", "options": [{"id": "q6o0", "text": "Add every requested feature to maximize scope"}, {"id": "q6o1", "text": "Prioritize affordable, popular features and refine product-market fit"}, {"id": "q6o2", "text": "Ignore numerical feedback and rely only on interviews"}, {"id": "q6o3", "text": "Increase the price to cover all proposed features"}], "correctId": "q6o1", "explanation": "The reviewer recommends isolating quantitative and qualitative feedback, prioritizing affordable popular features, and adjusting scope."}, {"id": "q7", "module": 1, "question": "A marketer wants to classify U.S. neighborhoods according to lifestyle characteristics and socioeconomic rank using census-based data. Which tool is most appropriate?", "options": [{"id": "q7o0", "text": "PRIZM"}, {"id": "q7o1", "text": "PEST"}, {"id": "q7o2", "text": "Three Circles Tool"}, {"id": "q7o3", "text": "Elevator pitch"}], "correctId": "q7o0", "explanation": "PRIZM characterizes U.S. Census data by lifestyle traits and socioeconomic rank down to the neighborhood level."}, {"id": "q8", "module": 1, "question": "A new entrant is entering a market where no direct competitor offers the same product. What should its competitive analysis emphasize?", "options": [{"id": "q8o0", "text": "Only companies with identical products"}, {"id": "q8o1", "text": "Substitute products that satisfy similar customer needs"}, {"id": "q8o2", "text": "The founder's personal narrative"}, {"id": "q8o3", "text": "The venture's internal funding sources"}], "correctId": "q8o1", "explanation": "When entering an entirely new market, competitive analysis should focus on substitute products rather than direct competitors."}, {"id": "q9", "module": 1, "question": "A company compares what it offers, what customers need, and what competitors offer. In the Three Circles Tool, the intersection of all three represents:", "options": [{"id": "q9o0", "text": "A market with no competition"}, {"id": "q9o1", "text": "Value parity"}, {"id": "q9o2", "text": "A firm's fixed assets"}, {"id": "q9o3", "text": "A completed PEST analysis"}], "correctId": "q9o1", "explanation": "The reviewer identifies the intersection of company offerings, customer needs, and competitor offerings as value parity."}, {"id": "q10", "module": 1, "question": "Which statement best describes the business model core?", "options": [{"id": "q10o0", "text": "A promotional story describing the founder's journey"}, {"id": "q10o1", "text": "A list of external political and social trends"}, {"id": "q10o2", "text": "A plan for making, distributing, funding, and earning profit from products"}, {"id": "q10o3", "text": "A ranking of neighborhoods by socioeconomic status"}], "correctId": "q10o2", "explanation": "The business model core explains how products are made, distributed, funded, and turned into profit."}, {"id": "q11", "module": 2, "question": "A startup describes the future it hopes to create and the organization it aspires to become over the next decade. This statement is primarily its:", "options": [{"id": "q11o0", "text": "Mission statement"}, {"id": "q11o1", "text": "Vision statement"}, {"id": "q11o2", "text": "SMART goal"}, {"id": "q11o3", "text": "Competitive analysis"}], "correctId": "q11o1", "explanation": "A vision is broad and future-oriented, describing the venture's broader purpose and aspirations."}, {"id": "q12", "module": 2, "question": "A company states who it serves, what it does, and its primary long-term market purpose while leaving room for new products. This is best described as its:", "options": [{"id": "q12o0", "text": "Mission statement"}, {"id": "q12o1", "text": "Vision statement"}, {"id": "q12o2", "text": "PEST analysis"}, {"id": "q12o3", "text": "Elevator pitch"}], "correctId": "q12o0", "explanation": "A mission defines who the organization is, what it does, and its primary long-term goals and market purpose without limiting innovation."}, {"id": "q13", "module": 2, "question": "Which comparison most accurately distinguishes vision from mission?", "options": [{"id": "q13o0", "text": "Vision is a detailed quarterly target; mission is a list of competitors"}, {"id": "q13o1", "text": "Vision describes an aspired future; mission explains the organization's identity and purpose"}, {"id": "q13o2", "text": "Vision explains funding; mission explains product distribution"}, {"id": "q13o3", "text": "Vision is always measurable; mission must contain a deadline"}], "correctId": "q13o1", "explanation": "The reviewer frames vision as broad and future-oriented and mission as more specific about organizational identity and purpose."}, {"id": "q14", "module": 2, "question": "A founder sets the objective: 'Capture 1.5% of the global specialty soap market within two years.' Which framework does this objective most directly illustrate?", "options": [{"id": "q14o0", "text": "PEST"}, {"id": "q14o1", "text": "SMART goal"}, {"id": "q14o2", "text": "PRIZM"}, {"id": "q14o3", "text": "Three Circles Tool"}], "correctId": "q14o1", "explanation": "The reviewer gives this as a SMART goal example; SMART means specific, measurable, achievable, relevant, and timely."}, {"id": "q15", "module": 2, "question": "A goal states, 'Improve our brand presence soon.' Which revision would make it more consistent with SMART goal-setting?", "options": [{"id": "q15o0", "text": "Become popular with everyone"}, {"id": "q15o1", "text": "Increase unaided brand awareness among the target segment by 10 percentage points within 12 months"}, {"id": "q15o2", "text": "Create a better brand someday"}, {"id": "q15o3", "text": "Spend more money on marketing whenever possible"}], "correctId": "q15o1", "explanation": "The revised goal is specific, measurable, and time-bound, illustrating key SMART characteristics."}, {"id": "q16", "module": 3, "question": "A founder explains how an overlooked customer problem led to an unexpected product solution, using a beginning, conflict, and resolution. This most closely reflects:", "options": [{"id": "q16o0", "text": "The entrepreneur's journey as a fairy-tale-like narrative"}, {"id": "q16o1", "text": "A PEST analysis"}, {"id": "q16o2", "text": "An asset-management plan"}, {"id": "q16o3", "text": "A competitive analysis grid"}], "correctId": "q16o0", "explanation": "The reviewer compares the entrepreneur's journey to a fairy tale: a universal structure moving from problem to ingenious solution."}, {"id": "q17", "module": 3, "question": "A company tells employees how it grew from a small operation into a successful organization to reconnect them with the founder's original dream. This is an example of:", "options": [{"id": "q17o0", "text": "Personal narrative"}, {"id": "q17o1", "text": "Corporate narrative"}, {"id": "q17o2", "text": "Quantitative feedback"}, {"id": "q17o3", "text": "Elevator pitch"}], "correctId": "q17o1", "explanation": "A corporate narrative tells the larger story of how a company grew from something small and recalls the founder's dreams."}, {"id": "q18", "module": 3, "question": "A founder's public story describes early setbacks, persistence, and lessons learned instead of claiming the venture succeeded effortlessly. Why is this approach preferable?", "options": [{"id": "q18o0", "text": "It hides the market's difficulties"}, {"id": "q18o1", "text": "It acknowledges challenges and perseverance more realistically"}, {"id": "q18o2", "text": "It guarantees that investors will provide funding"}, {"id": "q18o3", "text": "It removes the need for product testing"}], "correctId": "q18o1", "explanation": "The reviewer recommends a balanced personal narrative that acknowledges early challenges and perseverance."}, {"id": "q19", "module": 3, "question": "A startup repeatedly portrays its founder as a flawless hero who succeeded without difficulty. What is the main risk of this narrative strategy?", "options": [{"id": "q19o0", "text": "It may obscure market challenges and deep-seated design flaws"}, {"id": "q19o1", "text": "It automatically creates value parity"}, {"id": "q19o2", "text": "It provides reliable quantitative data"}, {"id": "q19o3", "text": "It makes the mission statement measurable"}], "correctId": "q19o0", "explanation": "An overly heroic startup story can cause the venture to miss market challenges or serious design flaws."}, {"id": "q20", "module": 3, "question": "A brand invites loyal customers to share how the product connects with meaningful personal memories and emotional legacies. Which narrative strategy is being used?", "options": [{"id": "q20o0", "text": "Connecting brand advocates to emotional legacies"}, {"id": "q20o1", "text": "Manufacturing FOMO"}, {"id": "q20o2", "text": "Using a competitive analysis grid"}, {"id": "q20o3", "text": "Applying PRIZM segmentation"}], "correctId": "q20o0", "explanation": "The reviewer describes connecting brand advocates to emotional legacies as a way to convey brand value through loyal customer perspectives."}, {"id": "q21", "module": 3, "question": "A campaign implies that consumers will be left behind unless they purchase immediately, even though the product is not essential. This is an example of:", "options": [{"id": "q21o0", "text": "A balanced personal narrative"}, {"id": "q21o1", "text": "FOMO-based persuasion"}, {"id": "q21o2", "text": "A corporate narrative"}, {"id": "q21o3", "text": "A mission statement"}], "correctId": "q21o1", "explanation": "FOMO strategies are criticized for manufacturing need and clouding people's sense of what is important."}, {"id": "q22", "module": 3, "question": "Why can a founder's honest account of product setbacks be strategically useful?", "options": [{"id": "q22o0", "text": "It replaces the need to understand customers"}, {"id": "q22o1", "text": "It can reveal that market challenges and design weaknesses deserve attention"}, {"id": "q22o2", "text": "It proves that the original idea was always correct"}, {"id": "q22o3", "text": "It prevents competitors from entering the market"}], "correctId": "q22o1", "explanation": "A balanced narrative acknowledges challenges rather than masking them with an effortless-success story."}, {"id": "q23", "module": 4, "question": "A founder prepares a pitch deck for potential investors. Which slide count is within the reviewer's maximum recommended limit?", "options": [{"id": "q23o0", "text": "8 slides"}, {"id": "q23o1", "text": "14 slides"}, {"id": "q23o2", "text": "18 slides"}, {"id": "q23o3", "text": "25 slides"}], "correctId": "q23o0", "explanation": "The reviewer recommends a maximum of 10 slides."}, {"id": "q24", "module": 4, "question": "Which set of details should an angel-investor 'Ask' slide communicate?", "options": [{"id": "q24o0", "text": "Founder biography, logo, and social-media links"}, {"id": "q24o1", "text": "Exact capital needed, planned use of funds, and expected return or milestone"}, {"id": "q24o2", "text": "Only the product name and mission"}, {"id": "q24o3", "text": "Competitor names without financial details"}], "correctId": "q24o1", "explanation": "The Ask slide should specify the amount, use of funds, and expected return or milestone achievement."}, {"id": "q25", "module": 4, "question": "Which sequence best follows the reviewer's three-sentence elevator-pitch structure?", "options": [{"id": "q25o0", "text": "Describe the company history, list competitors, request funding"}, {"id": "q25o1", "text": "State name and target user; explain problem and solution; request a follow-up meeting"}, {"id": "q25o2", "text": "Give financial projections; show product features; end without a request"}, {"id": "q25o3", "text": "State the mission; describe the founder's childhood; ask for a purchase"}], "correctId": "q25o1", "explanation": "The three-sentence structure introduces the speaker and target user, explains the problem-solution, and asks for a follow-up meeting."}, {"id": "q26", "module": 4, "question": "A founder is speaking to friends and family about a new venture. Which approach is most appropriate for this audience?", "options": [{"id": "q26o0", "text": "A less formal pitch grounded in personal reputation and emotional connection"}, {"id": "q26o1", "text": "A presentation focused exclusively on audited financial returns"}, {"id": "q26o2", "text": "A technical report with no personal context"}, {"id": "q26o3", "text": "A formal securities prospectus"}], "correctId": "q26o0", "explanation": "Friends and family pitches are less formal and rely on personal reputation and emotional connection."}, {"id": "q27", "module": 4, "question": "A venture capitalist evaluates a startup's pitch. Which evidence is most likely to matter according to the reviewer?", "options": [{"id": "q27o0", "text": "Only the founder's enthusiasm"}, {"id": "q27o1", "text": "Rigorous market data, financial returns, team, product, and value proposition"}, {"id": "q27o2", "text": "A humorous opening story"}, {"id": "q27o3", "text": "The number of animations in the deck"}], "correctId": "q27o1", "explanation": "VCs and angel investors require rigorous market data, financial returns, and highlights on the team, product, and value proposition."}, {"id": "q28", "module": 4, "question": "A student submits a written business model to an event, while another student presents a pitch deck to judges. Which distinction is most accurate?", "options": [{"id": "q28o0", "text": "Both are necessarily contests"}, {"id": "q28o1", "text": "The written business-model submission resembles a contest; the live pitch resembles a pitch competition"}, {"id": "q28o2", "text": "The written submission is an elevator pitch"}, {"id": "q28o3", "text": "The deck presentation is secondary research"}], "correctId": "q28o1", "explanation": "The reviewer distinguishes contests, which usually involve documentation, from pitch competitions, which require a pitch deck or summary presentation."}, {"id": "q29", "module": 4, "question": "A competition submission makes bold claims but provides little evidence in the document itself. Which principle should guide the team in strengthening it?", "options": [{"id": "q29o0", "text": "Iceberg principle: support every statement with thorough research and details"}, {"id": "q29o1", "text": "FOMO principle: create urgency"}, {"id": "q29o2", "text": "PRIZM principle: classify neighborhoods"}, {"id": "q29o3", "text": "Three Circles principle: remove all competitor references"}], "correctId": "q29o0", "explanation": "The reviewer says submissions should use the iceberg principle, backing every statement with thorough supporting research and details."}, {"id": "q30", "module": 4, "question": "A student joins an entrepreneurship competition mainly to gain guidance from an experienced founder. Why is this a sound reason according to the reviewer?", "options": [{"id": "q30o0", "text": "Mentorship may be a better predictor of long-term success than cash"}, {"id": "q30o1", "text": "Mentors guarantee immediate profits"}, {"id": "q30o2", "text": "Competitions never provide funding"}, {"id": "q30o3", "text": "Mentorship removes the need for a business model"}], "correctId": "q30o0", "explanation": "The reviewer identifies finding a mentor as the top reason to join and notes it may predict long-term success better than cash."}, {"id": "q31", "module": 5, "question": "A startup has limited cash and is considering buying brand-new machinery that may be underused during its first year. Which action best reflects the reviewer's asset-management advice?", "options": [{"id": "q31o0", "text": "Buy all equipment immediately to signal credibility"}, {"id": "q31o1", "text": "Lease equipment or purchase used equipment to conserve cash"}, {"id": "q31o2", "text": "Spend contingency funds on premium assets"}, {"id": "q31o3", "text": "Increase inventory before estimating demand"}], "correctId": "q31o1", "explanation": "Early startups should lease or buy used equipment to avoid overinvestment in fixed assets and preserve cash."}, {"id": "q32", "module": 5, "question": "A company wants to prevent employees from disclosing confidential product formulas and internal business information. Which agreement is most directly relevant?", "options": [{"id": "q32o0", "text": "Noncompete agreement"}, {"id": "q32o1", "text": "Nondisclosure agreement (NDA)"}, {"id": "q32o2", "text": "Mission statement"}, {"id": "q32o3", "text": "Seed funding agreement"}], "correctId": "q32o1", "explanation": "An NDA protects proprietary venture information by establishing secrecy obligations and penalties or time limits."}, {"id": "q33", "module": 5, "question": "A firm asks a departing employee not to work for a competitor for a specified period. This provision is characteristic of a:", "options": [{"id": "q33o0", "text": "Nondisclosure agreement"}, {"id": "q33o1", "text": "Noncompete agreement"}, {"id": "q33o2", "text": "Business model core"}, {"id": "q33o3", "text": "Pitch deck"}], "correctId": "q33o1", "explanation": "A noncompete agreement restricts work for a competitor for a specified period."}, {"id": "q34", "module": 5, "question": "A founder believes that an untested initial idea is more valuable to protect than all later development work. Which view best reflects the reviewer's position?", "options": [{"id": "q34o0", "text": "Initial ideas are always the most important intellectual property"}, {"id": "q34o1", "text": "Execution, know-how, iterative learning, and trade secrets can matter more than raw concepts"}, {"id": "q34o2", "text": "Ideas cannot be improved after launch"}, {"id": "q34o3", "text": "Only a noncompete can protect an idea"}], "correctId": "q34o1", "explanation": "The reviewer says protecting initial ideas is less critical than iterative versions and trade secrets because execution and learning matter more."}, {"id": "q35", "module": 5, "question": "A software company keeps an unreleased feature dormant in its interface until the planned launch, masking its capability from users. Which technique does this illustrate?", "options": [{"id": "q35o0", "text": "PRIZM"}, {"id": "q35o1", "text": "Subterfuge"}, {"id": "q35o2", "text": "PEST analysis"}, {"id": "q35o3", "text": "Value parity"}], "correctId": "q35o1", "explanation": "The reviewer describes masking dormant proprietary software capabilities in the user interface until launch as subterfuge."}];
+const TOTAL = 35;
+const DURATION_SECONDS = 60 * 60;
+let answers = Object.create(null);
+let current = 0;
+let remaining = DURATION_SECONDS;
+let hasSubmitted = false;
+let timerHandle = null;
+let startedAt = Date.now();
+let submittedAt = null;
+let shuffledOptions = [];
+
+function shuffleOptions() {
+  shuffledOptions = QUESTIONS.map(q => {
+    const a = q.options.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  });
+}
+function answeredCount() { return Object.keys(answers).length; }
+function updateProgress() {
+  const count = answeredCount(), unanswered = TOTAL - count, pct = Math.round(count / TOTAL * 100);
+  document.getElementById("answeredText").textContent = count + " answered";
+  document.getElementById("unansweredText").textContent = unanswered + " unanswered";
+  document.getElementById("percentText").textContent = pct + "%";
+  document.getElementById("progressFill").style.width = pct + "%";
+  document.getElementById("progressTrack").setAttribute("aria-valuenow", String(pct));
+  document.querySelectorAll(".nav-btn").forEach((b, i) => {
+    b.classList.toggle("answered", Object.prototype.hasOwnProperty.call(answers, QUESTIONS[i].id));
+    b.classList.toggle("active", i === current);
+    b.setAttribute("aria-current", i === current ? "step" : "false");
+  });
+}
+function renderNav() {
+  const grid = document.getElementById("navGrid");
+  grid.innerHTML = "";
+  for (let i = 0; i < TOTAL; i++) {
+    if (i % 10 === 0) {
+      const label = document.createElement("div");
+      label.className = "module-break";
+      label.style.gridColumn = "1 / -1";
+      label.textContent = "MODULE " + (Math.floor(i / 10) + 1);
+      grid.appendChild(label);
+    }
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "nav-btn"; b.textContent = String(i + 1);
+    b.setAttribute("aria-label", "Go to question " + (i + 1));
+    b.addEventListener("click", () => { current = i; renderQuestion(); });
+    grid.appendChild(b);
+  }
+}
+function renderQuestion() {
+  const q = QUESTIONS[current];
+  document.getElementById("questionCount").textContent = "Question " + (current + 1) + " of " + TOTAL;
+  document.getElementById("moduleName").textContent = "MODULE " + q.module + " · " + ["Foundational Concepts & Opportunity Assessment","Strategy, Vision, Mission & Target Setting","Corporate Narratives & Brand Storytelling","Pitching Dynamics, Competitions & Investor Relations","Operations, Asset Management & Intellectual Property"][q.module - 1];
+  document.getElementById("questionText").textContent = q.question;
+  const wrap = document.getElementById("options"); wrap.innerHTML = "";
+  shuffledOptions[current].forEach((opt, idx) => {
+    const label = document.createElement("label");
+    label.className = "option" + (answers[q.id] === opt.id ? " selected" : "");
+    const input = document.createElement("input");
+    input.type = "radio"; input.name = "answer-" + q.id; input.value = opt.id;
+    input.checked = answers[q.id] === opt.id;
+    input.addEventListener("change", () => {
+      if (hasSubmitted) return;
+      answers[q.id] = opt.id;
+      renderQuestion();
+      updateProgress();
+    });
+    const letter = document.createElement("span"); letter.className = "letter"; letter.textContent = String.fromCharCode(65 + idx);
+    const text = document.createElement("span"); text.className = "option-text"; text.textContent = opt.text;
+    label.append(input, letter, text); wrap.appendChild(label);
+  });
+  document.getElementById("prevBtn").disabled = current === 0;
+  document.getElementById("nextBtn").disabled = current === TOTAL - 1;
+  updateProgress();
+}
+function updateTimer() {
+  const m = Math.floor(remaining / 60), s = remaining % 60;
+  const el = document.getElementById("timer");
+  el.textContent = String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+  el.classList.toggle("warning", remaining <= 300);
+}
+function tick() {
+  if (hasSubmitted) return;
+  remaining = Math.max(0, remaining - 1);
+  updateTimer();
+  if (remaining === 0) submitExam(true);
+}
+function openConfirm() {
+  if (hasSubmitted) return;
+  document.getElementById("modalAnswered").textContent = String(answeredCount());
+  document.getElementById("modalUnanswered").textContent = String(TOTAL - answeredCount());
+  document.getElementById("confirmModal").classList.remove("hidden");
+  document.getElementById("confirmSubmit").focus();
+}
+function closeConfirm() { document.getElementById("confirmModal").classList.add("hidden"); }
+function calculateScore() {
+  return QUESTIONS.reduce((sum, q) => sum + (answers[q.id] === q.correctId ? 1 : 0), 0);
+}
+function submitExam(auto = false) {
+  if (hasSubmitted) return;
+  if (!auto && document.getElementById("confirmModal").classList.contains("hidden")) return;
+  hasSubmitted = true;
+  submittedAt = Date.now();
+  if (timerHandle !== null) clearInterval(timerHandle);
+  closeConfirm();
+  const score = calculateScore();
+  const maxScore = TOTAL;
+  const elapsedSeconds = Math.min(DURATION_SECONDS, Math.max(0, Math.floor((submittedAt - startedAt) / 1000)));
+  const correct = score;
+  const incorrect = answeredCount() - correct;
+  const unanswered = TOTAL - answeredCount();
+  // Required Examora integration: send exactly once, only after successful submission.
+  if (!window.__examoraMessageSent) {
+    window.__examoraMessageSent = true;
+    try {
+      window.parent.postMessage({
+        type: 'EXAMORA_SUBMIT',
+        payload: { score: score, maxScore: maxScore, completed: true }
+      }, '*');
+    } catch (e) {
+      console.error("Examora submission message could not be sent.", e);
+    }
+  }
+  showResults(score, correct, incorrect, unanswered, elapsedSeconds, auto);
+}
+function formatDuration(seconds) {
+  const m = Math.floor(seconds / 60), s = seconds % 60;
+  return String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0");
+}
+function showResults(score, correct, incorrect, unanswered, elapsedSeconds, auto) {
+  document.getElementById("examLayout").classList.add("hidden");
+  const results = document.getElementById("results");
+  results.classList.remove("hidden");
+  const pct = Math.round(score / TOTAL * 100);
+  results.innerHTML = `
+    <div class="result-head">
+      <div class="result-icon" aria-hidden="true">✓</div>
+      <div class="part-tag">${auto ? "TIME EXPIRED · AUTO-SUBMITTED" : "EXAMINATION SUBMITTED"}</div>
+      <h2>Examination Results</h2>
+      <div class="score">${score}/${TOTAL}</div>
+      <div class="percent">${pct}% · ${pct >= 75 ? "Strong performance" : pct >= 50 ? "Keep building your understanding" : "Review the modules and try again"}</div>
+    </div>
+    <div class="result-grid">
+      <div class="result-stat"><strong>${correct}</strong><span>Correct</span></div>
+      <div class="result-stat"><strong>${incorrect}</strong><span>Incorrect</span></div>
+      <div class="result-stat"><strong>${unanswered}</strong><span>Unanswered</span></div>
+      <div class="result-stat"><strong>${formatDuration(elapsedSeconds)}</strong><span>Time used</span></div>
+    </div>
+    <h3 class="review-title">Answer Review</h3>
+    <p class="notice">Review each question alongside your selected answer and the correct answer. Explanations summarize the corresponding concepts in the EBP reviewer.</p>
+    <div id="reviewList"></div>`;
+  const list = results.querySelector("#reviewList");
+  QUESTIONS.forEach((q, idx) => {
+    const selectedId = answers[q.id] || null;
+    const selected = q.options.find(o => o.id === selectedId);
+    const correctOption = q.options.find(o => o.id === q.correctId);
+    const isCorrect = selectedId === q.correctId;
+    const div = document.createElement("article");
+    div.className = "review-item " + (isCorrect ? "correct" : "incorrect");
+    const heading = document.createElement("p"); heading.className = "review-q"; heading.textContent = (idx + 1) + ". " + q.question;
+    const status = document.createElement("div"); status.className = "status " + (isCorrect ? "good" : "bad"); status.textContent = isCorrect ? "Correct · 1 point" : "Incorrect · 0 points";
+    const your = document.createElement("p"); your.className = "review-line"; your.textContent = "Your answer: " + (selected ? selected.text : "Not answered");
+    const right = document.createElement("p"); right.className = "review-line"; right.textContent = "Correct answer: " + correctOption.text;
+    const explain = document.createElement("div"); explain.className = "review-explanation"; explain.textContent = q.explanation;
+    div.append(heading, status, your, right, explain); list.appendChild(div);
+  });
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+document.getElementById("prevBtn").addEventListener("click", () => { if (current > 0 && !hasSubmitted) { current--; renderQuestion(); } });
+document.getElementById("nextBtn").addEventListener("click", () => { if (current < TOTAL - 1 && !hasSubmitted) { current++; renderQuestion(); } });
+document.getElementById("submitBtn").addEventListener("click", openConfirm);
+document.getElementById("cancelSubmit").addEventListener("click", closeConfirm);
+document.getElementById("confirmSubmit").addEventListener("click", () => submitExam(false));
+document.getElementById("confirmModal").addEventListener("click", e => { if (e.target.id === "confirmModal") closeConfirm(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeConfirm(); });
+shuffleOptions();
+renderNav();
+renderQuestion();
+updateTimer();
+timerHandle = setInterval(tick, 1000);
+</script>
+</body>
+</html>
